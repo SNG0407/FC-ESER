@@ -28,7 +28,9 @@ def nep_worker(knn,P,sid,eid,process_i,res_dict):
 
 def nep_distance_opt_mp(knn, dist):
     print("generate nep distance ...")
-    processNum = 8 #10  64 -> 4 (MemoryError)
+    #knn = knn[:1000]
+    #dist = dist[:1000, :1000]
+    processNum = 1 #10  64 -> 4 (MemoryError)
     sigma = 0.5 
     n, k = knn.shape
     P = np.exp(- dist / sigma)   
@@ -79,7 +81,8 @@ if __name__ == '__main__':
     dists = nep_distance_opt_mp(nbrs, dists)
     print(dists)
     
-    output_dists_path = input_data_path.replace("face.npy", "knn_dists_trans2.npz")
+    # output_dists_path = input_data_path.replace("face.npy", "knn_dists_trans2.npz")
+    output_dists_path = input_data_path.replace("faiss_k_80.npz", "knn_dists_trans2.npz")
     np.savez_compressed(output_dists_path, data=dists)
 
 # 사용: python nep_distance2.py --input_data_path "../data/knns/{}/faiss_k_80.npz" --part part1_test
