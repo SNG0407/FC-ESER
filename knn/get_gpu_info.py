@@ -21,8 +21,6 @@ def get_gpu_info():
 def get_gpu_num():
     try:
         ngpu = torch.cuda.device_count()
-        if (ngpu == 0):
-            ngpu = faiss.get_num_gpus()
     except:
         ngpu = len(GPUtil.getGPUs())
     return ngpu

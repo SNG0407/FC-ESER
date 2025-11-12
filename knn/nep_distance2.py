@@ -28,7 +28,7 @@ def nep_worker(knn,P,sid,eid,process_i,res_dict):
 
 def nep_distance_opt_mp(knn, dist):
     print("generate nep distance ...")
-    processNum = 64 #10
+    processNum = 8 #10  64 -> 4 (MemoryError)
     sigma = 0.5 
     n, k = knn.shape
     P = np.exp(- dist / sigma)   
@@ -56,16 +56,23 @@ def nep_distance_opt_mp(knn, dist):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description = 'knn')
-    parser.add_argument('--input_data_path',  metavar = 'IP', type = str, default = "../data/knns/{}/face.npy", help = 'input data path')
+    parser.add_argument('--input_data_path', metavar='IP', type=str, default="../data/knns/{}/faiss_k_80.npz", help='input data path')
+    #parser.add_argument('--input_data_path',  metavar = 'IP', type = str, default = "../data/knns/{}/face.npy", help = 'input data path')
     parser.add_argument('--part',  metavar = 'PT', type = str, default = "part1_test", help = 'part name')
     args = parser.parse_args()
 
     input_data_path = args.input_data_path.format(args.part) 
-    output_nbrs_path = input_data_path.replace("face.npy", "knn_nbrs.npz")
-    output_dists_path = input_data_path.replace("face.npy", "knn_dists.npz")
-
-    nbrs = np.load(output_nbrs_path)["data"]
-    dists = np.load(output_dists_path)["data"]
+    
+    # Precomputed KNN 파일 불러오기
+    data = np.load(input_data_path)['data']
+    nbrs = data[:, 0, :].astype(int)     # 이웃 인덱스 (int 변환 필수)
+    dists = data[:, 1, :]                # 거리 (float64)
+    
+    #output_nbrs_path = input_data_path.replace("face.npy", "knn_nbrs.npz")
+    #output_dists_path = input_data_path.replace("face.npy", "knn_dists.npz")
+    #nbrs = np.load(output_nbrs_path)["data"]
+    #dists = np.load(output_dists_path)["data"]
+    
     dists = np.clip(dists, 0.0, 1.0)
     # l2^2 = (1-ip)*2
     dists = 2 - 2 * dists
@@ -74,3 +81,5 @@ if __name__ == '__main__':
     
     output_dists_path = input_data_path.replace("face.npy", "knn_dists_trans2.npz")
     np.savez_compressed(output_dists_path, data=dists)
+
+# 사용: python nep_distance2.py --input_data_path "../data/knns/{}/faiss_k_80.npz" --part part1_test
