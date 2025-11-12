@@ -82,7 +82,11 @@ if __name__ == '__main__':
     print(dists)
     
     # output_dists_path = input_data_path.replace("face.npy", "knn_dists_trans2.npz")
-    output_dists_path = input_data_path.replace("faiss_k_80.npz", "knn_dists_trans2.npz")
+    #output_dists_path = input_data_path.replace("faiss_k_80.npz", "knn_dists_trans2.npz")
+    #np.savez_compressed(output_dists_path, data=dists)
+    
+    output_dists_path = f"../data/knns/{args.part}/knn_dists_trans2.npz"
     np.savez_compressed(output_dists_path, data=dists)
+    print(f"Saved result file to: {output_dists_path}")
 
 # 사용: python nep_distance2.py --input_data_path "../data/knns/{}/faiss_k_80.npz" --part part1_test

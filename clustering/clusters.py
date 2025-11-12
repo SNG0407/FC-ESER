@@ -132,7 +132,7 @@ def cluster_by_infomap(nbrs, dists, lbs, tt, args):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description = 'clustering')
-    parser.add_argument('--input_data_path',  metavar = 'IP', type = str, default = "../data/knns/{}/face.npy", help = 'input data path')
+    parser.add_argument('--input_data_path',  metavar = 'IP', type = str, default = "../data/knns/{}/faiss_k_80.npz", help = 'input data path')
     parser.add_argument('--part',  metavar = 'PT', type = str, default = "part1_test", help = 'part name')
     parser.add_argument('--er', action = 'store_true', help = 'additional edge recall' )
     parser.add_argument('--theta',  metavar = 'Ptheta', type = float, default = 0.22, help = 'parameters theta')
@@ -143,17 +143,21 @@ if __name__ == '__main__':
     with Timer('All face cluster step'):
         # read knn and nep
         knn_data_path = args.input_data_path.format(args.part)
-        nep_dists_path = knn_data_path.replace("face.npy", "knn_dists_trans2.npz")
-        nbrs_path = knn_data_path.replace("face.npy", "knn_nbrs.npz")
+        nep_dists_path = knn_data_path.replace("faiss_k_80.npz", "knn_dists_trans2.npz")
+        nbrs_path = knn_data_path.replace("faiss_k_80.npz", "faiss_k_80.npz")
+        
+        # Precomputed KNN 파일 불러오기
+        data = np.load(nbrs_path)['data']
+        nbrs = data[:, 0, :].astype(int)     # 이웃 인덱스 (int 변환 필수)
         
         dists = np.load(nep_dists_path)['data']
         dists = np.clip(dists, 0.0, 1.0)
-        nbrs = np.load(nbrs_path)['data']
+        #nbrs = np.load(nbrs_path)['data']
         print("dists max {} min {}".format(np.max(dists), np.min(dists)))
         print(dists.shape, nbrs.shape)
         
         # read gt labels for metrics
-        label_path = knn_data_path.replace("knns", "labels").replace("/face.npy", ".meta")
+        label_path = knn_data_path.replace("knns", "labels").replace("/faiss_k_80.npz", ".meta")
                    
         true_lb2idxs, true_idx2lb = read_meta(label_path)
         lbs = intdict2ndarray(true_idx2lb)
@@ -169,3 +173,6 @@ if __name__ == '__main__':
 
         # clustering
         cluster_by_infomap(nbrs, dists, lbs, tt, args)
+
+# 사용 엣지 리콜 사용 O: python clusters.py --input_data_path "../data/knns/{}/faiss_k_80.npz" --part part1_test --theta 0.22 --er --delta 0.12 --eta 0.60
+# 사용 엣지 리콜 사용 X: python clusters.py --input_data_path "../data/knns/{}/faiss_k_80.npz" --part part1_test --theta 0.22 --delta 0.12 --eta 0.60
