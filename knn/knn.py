@@ -71,7 +71,7 @@ if __name__ == '__main__':
     
     # knn
     k = args.k #80
-    dists, nbrs = faiss_search_approx_knn(feats, feats, k)
+    dists, nbrs = faiss_search_approx_knn(feats, feats, k, None, False)
     print("dists shape {} nbrs shape {}".format(dists.shape, nbrs.shape))
     
     output_nbrs_path = args.input_data_path.replace("features/{}.bin", "knns/{}/knn_nbrs.npz").format(args.part)
